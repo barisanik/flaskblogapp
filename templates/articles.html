@@ -29,7 +29,7 @@
     <tr>
       <td><a href="/articles/{{article.artID}}">{{article.title}}</a></td>
       <td> <a href="/user/{{article.author}}"> {{article.author}} </a></td>
-      <td>{{article.created_date}}</td>
+      <td>{{article.created_date.strftime('%d/%m/%Y %H:%M:%S')}}</td>
     </tr>
           {% endfor %}
   </tbody>
