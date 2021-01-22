@@ -5,8 +5,8 @@
 
 <h4>{{user.username}}</h4>
 <hr>
-<div>Kaydolma Tarihi: {{user.register_date}} 
-Son Etkinlik: {{user.last_activity}}
+<div><b>Kaydolma Tarihi:</b> {{user.register_date.strftime('%d/%m/%Y %H:%M')}} <br>
+<b>Son Etkinlik:</b> {{user.last_activity.strftime('%d/%m/%Y %H:%M:%S')}}
 </div>
 <hr>
 <h4> Son Makaleler </h4>
