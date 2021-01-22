@@ -5,7 +5,7 @@ from passlib.hash import sha256_crypt
 import datetime
 from functools import wraps #decorator ile giriş kontrolü için
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/Barış/Desktop/cleanBlogForServer/blog.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////blogdizini/blog.db'
 app.secret_key = "myblog"
 db = SQLAlchemy(app)
 
@@ -241,4 +241,4 @@ def deleteArticle(id):
 
 if __name__ == "__main__":
     db.create_all()
-    app.run(debug=True, host="192.168.1.33")
+    app.run(debug=True)
