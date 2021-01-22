@@ -25,7 +25,7 @@
       {% for i in userArticles %}
     <tr>
       <td><a href="/articles/{{i.artID}}"> {{i.title}} </a></td>
-      <td>{{i.created_date}}</td>
+      <td>{{i.created_date.strftime('%d/%m/%Y %H:%M:%S')}}</td>
     </tr>
       {% endfor %}
   </tbody>
