@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% from "includes/_formhelpers.html" import render_field %}
+<div style="float:left;position:relative;left:50%;margin-top:150px">
+<div style="float:left;position:relative;left:-50%">
+<form method="POST">
+<dl>
+    {{ render_field(form.username) }}
+    {{ render_field(form.newpass) }}
+    {{ render_field(form.newpassagain) }}
+    <button style="float:right" type="submit" class="btn btn-danger">Şifre Yenile</button>
+    </dl>
+</form>
+{% endblock body %}

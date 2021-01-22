@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+<br><br><br>
+{% block body %}
+<h3>Makaleler</h3>
+
+
+{% if articles %}
+<form action="/search" method = "POST">
+
+
+
+<input type="text" name="searchKeyword" class="input-sm" style="float:left" maxlength="40" placeholder="Bir kelime yazın.." />
+ <button style="float:left" type="submit" class="btn btn-danger btn-sm">Ara</button>
+</form>
+<br>
+<br>
+
+
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th scope="col">Başlık</th>
+      <th scope="col">Yazar</th>
+      <th scope="col">Oluşturulma Tarihi</th>
+    </tr>
+  </thead>
+  <tbody>
+          {% for article in articles %}
+    <tr>
+      <td><a href="/articles/{{article.artID}}">{{article.title}}</a></td>
+      <td> <a href="/user/{{article.author}}"> {{article.author}} </a></td>
+      <td>{{article.created_date}}</td>
+    </tr>
+          {% endfor %}
+  </tbody>
+</table>
+
+
+
+{% else %}
+<div class="alert alert-danger">Bu blogda henüz makale bulunmuyor.</div>
+{% endif%}
+
+{% endblock body %}

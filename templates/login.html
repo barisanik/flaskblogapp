@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+<br><br>
+{% block body %}
+
+<h3>Giriş Yap</h3>
+<hr>
+
+{% from "includes/_formhelpers.html" import render_field %}
+<div style="float:left;position:relative;left:50%;margin-top:100px">
+<div style="float:left;position:relative;left:-50%">
+<form method="POST">
+<dl>
+    {{ render_field(form.username) }}
+    {{ render_field(form.password) }}
+    <a style='float:right'href="/forgot">Şifrenizi mi unuttunuz?</a> <br><br>
+    <button type="submit" class="btn btn-dark">Giriş Yap</button>
+    </dl>
+</form>
+</div>
+</div>
+{% endblock body %}

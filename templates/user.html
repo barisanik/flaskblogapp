@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+<br><br><br>
+{% block body %}
+
+
+<h4>{{user.username}}</h4>
+<hr>
+<div>Kaydolma Tarihi: {{user.register_time}} 
+Son Etkinlik: {{user.last_activity}}
+</div>
+<hr>
+<h4> Son Makaleler </h4>
+
+
+{% if userArticles %}
+
+<table class="table table-hover" style="margin-top: 20px">
+  <thead>
+    <tr>
+      <th scope="col">Başlık</th>
+      <th scope="col">Oluşturulma Tarihi</th>
+    </tr>
+  </thead>
+  <tbody>
+      {% for i in userArticles %}
+    <tr>
+      <td><a href="/articles/{{i.artID}}"> {{i.title}} </a></td>
+      <td>{{i.created_date}}</td>
+    </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+<div class="alert alert-warning" style="margin-top: 30px">Bu kullanıcının henüz makalesi bulunmuyor.</div>
+{% endif %}
+
+{% endblock body %}
