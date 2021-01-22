@@ -16,8 +16,10 @@ class users(db.Model):
     username = db.Column(db.String)
     password = db.Column(db.String)
     email = db.Column(db.String)
+    authorizationGroup = db.Column(db.Integer, default = 1)
     last_activity = db.Column(db.DateTime)
     register_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
 # articles table
 class articles(db.Model):
     artID = db.Column(db.Integer, primary_key=True, autoincrement = True)
@@ -26,6 +28,24 @@ class articles(db.Model):
     content = db.Column(db.String)
     created_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+# User Permissions Table
+class permissions(db.Model):
+    groupID = db.Column(db.Integer, primary_key=True)
+    groupName = db.Column(db.String)
+    canSeePublicContents = db.Column(db.Boolean, default = True)
+    canSeePrivateContents = db.Column(db.Boolean, default = False)
+    canEditAllContents = db.Column(db.Boolean, default = False)
+    canSeeAllUsers = db.Column(db.Boolean, default = True)
+    canEditUsers = db.Column(db.Boolean, default = False)
+    canDeleteUsers = db.Column(db.Boolean, default = False)
+    canAddComment = db.Column(db.Boolean, default = True)
+    canSeeAllComments = db.Column(db.Boolean, default = True)
+    canSendMessages = db.Column(db.Boolean, default = True)
+    canRecieveMessages = db.Column(db.Boolean, default = False)
+    canSeeAdminComments = db.Column(db.Boolean, default = False)
+    canSeeAdminContents = db.Column(db.Boolean, default = False)
+    fullAccess = db.Column(db.Boolean, default = False)
+    
 #Login check decorator
 def login_required(f):
     @wraps(f)
