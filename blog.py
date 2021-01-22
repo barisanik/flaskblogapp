@@ -57,6 +57,7 @@ class LoginForm(Form):
 #Reset Password Form
 class ResetPassForm(Form):
     username = StringField("Kullanıcı Adınız")
+    oldpass = PasswordField("Eski Parola")
     newpass = PasswordField("Parola", validators=[
         validators.DataRequired(message= "Lütfen bir parola belirleyin."),
         validators.Length(min=4, max=20, message="Parola en az 4 en fazla 20 haneli olmalıdır."),
@@ -157,12 +158,14 @@ def passwordChangePage():
         logUsername = form.username.data
         userInfoCheck = users.query.filter_by(username=logUsername).first()
         if userInfoCheck:  
+            oldpass = form.oldpass.data  
             newpass = form.newpass.data
             newpassagain = form.newpassagain.data
-            if newpass == newpassagain:
-                userInfoCheck.password = sha256_crypt.encrypt(form.newpass.data)
-                db.session.commit()
-                flash("Şifreniz başarıyla değiştirildi!","success")
+            if sha256_crypt.verify(oldpass, userInfoCheck.password):
+                if newpass == newpassagain:
+                    userInfoCheck.password = sha256_crypt.encrypt(form.newpass.data)
+                    db.session.commit()
+                    flash("Şifreniz başarıyla değiştirildi!","success")
     return render_template("forgot.html", form=form)
 
 @app.route("/articles") 
