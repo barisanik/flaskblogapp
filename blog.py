@@ -5,7 +5,7 @@ from passlib.hash import sha256_crypt
 import datetime
 from functools import wraps #decorator ile giriş kontrolü için
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////blogdizini/blog.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////blog/directory/blog.db'
 app.secret_key = "myblog"
 db = SQLAlchemy(app)
 
