@@ -7,6 +7,7 @@
 <form method="POST">
 <dl>
     {{ render_field(form.username) }}
+    {{ render_field(form.oldpass) }}
     {{ render_field(form.newpass) }}
     {{ render_field(form.newpassagain) }}
     <button style="float:right" type="submit" class="btn btn-danger">Şifre Yenile</button>
