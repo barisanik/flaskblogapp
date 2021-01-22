@@ -29,7 +29,7 @@
       <th scope="row">{{article.artID}}</th>
       <td><a href="/articles/{{article.artID}}"> {{article.title}} </a></td>
       <td> <a href="/user/{{article.author}}"> {{article.author}} </a></td>
-      <td>{{article.created_date}}</td>
+      <td>{{article.created_date.strftime('%d/%m/%Y %H:%M:%S')}}</td>
       <td><a href="/edit/{{article.artID}}" class = "btn btn-primary">Güncelle</a></td>
       <td><a href="/delete/{{article.artID}}" class = "btn btn-danger">Sil</a></td>
     </tr>
