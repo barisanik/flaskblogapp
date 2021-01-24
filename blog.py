@@ -11,23 +11,32 @@ db = SQLAlchemy(app)
 
 #Database tables
 #user table
-class users(db.Model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement = True)
+    active = db.Column('is_active', db.Boolean(), nullable=False, server_default='1')
     username = db.Column(db.String)
     password = db.Column(db.String)
-    email = db.Column(db.String)
+    email = db.Column(db.String(255, collation='NOCASE'), nullable=False, unique=True)
     authorizationGroup = db.Column(db.Integer, default = 1)
     last_activity = db.Column(db.DateTime)
     register_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     
-# articles table
+# Articles table
 class articles(db.Model):
     artID = db.Column(db.Integer, primary_key=True, autoincrement = True)
     title = db.Column(db.String)
     author = db.Column(db.String)
     content = db.Column(db.String)
     created_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-
+    
+# Message table
+class messages(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement = True)
+    from_id = db.Column(db.Integer, nullable=False)
+    to_id = db.Column(db.Integer, nullable=False)
+    content = db.Column(db.String, nullable=False)
+    sent_time = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
 # User Permissions Table
 class permissions(db.Model):
     groupID = db.Column(db.Integer, primary_key=True)
@@ -55,6 +64,18 @@ def login_required(f):
         else:
             flash("Bu sayfayı görüntülemek için lütfen giriş yapın!","danger")
             return redirect(url_for("loginPage"))
+    return decorated_function
+
+#Role check decorator
+def role_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        userInfoCheck = User.query.filter_by(username=session["username"]).first()
+        if userInfoCheck.authorizationGroup == 9:
+            return f(*args, **kwargs)
+        else:
+            flash("Bu işlem için yetkiniz bulunmamaktadır!","danger")
+            return redirect(url_for("indexPage"))
     return decorated_function
 
 #Forms
@@ -108,14 +129,14 @@ def registerPage():
     form = RegisterForm(request.form)
     if request.method == "POST" and form.validate():
         regUsername = form.username.data
-        userInfoCheck = users.query.filter_by(username=regUsername).first()
+        userInfoCheck = User.query.filter_by(username=regUsername).first()
         if userInfoCheck:
             flash("Belirtilen kullanıcı adı mevcut!","danger")
         else:
             regPass = sha256_crypt.encrypt(form.password.data)
             regMail = form.email.data
             regDate = datetime.datetime.now()
-            registerSQL = users(username = regUsername, password = regPass, email = regMail, last_activity = regDate, register_date = regDate)
+            registerSQL = User(username = regUsername, password = regPass, email = regMail, last_activity = regDate, register_date = regDate)
             db.session.add(registerSQL)
             db.session.commit()
             flash("Başarıyla Kayıt Oldunuz!","success")
@@ -130,7 +151,7 @@ def loginPage():
     if request.method == "POST":
         logUsername = form.username.data
         password_ent = form.password.data
-        userInfoCheck = users.query.filter_by(username=logUsername).first()
+        userInfoCheck = User.query.filter_by(username=logUsername).first()
         if userInfoCheck:
             if sha256_crypt.verify(password_ent, userInfoCheck.password):
                 flash("Başarıyla giriş yapıldı!","success")
@@ -138,6 +159,7 @@ def loginPage():
                 session["username"] = logUsername
                 currentdate = datetime.datetime.now()
                 userInfoCheck.last_activity = currentdate
+                userInfoCheck.is_active = True
                 db.session.commit()
                 return redirect(url_for("indexPage"))
             else:
@@ -152,9 +174,10 @@ def loginPage():
 
 @app.route("/logout") 
 def logoutPage():
-    userInfoCheck = users.query.filter_by(username=session["username"]).first()
+    userInfoCheck = User.query.filter_by(username=session["username"]).first()
     currentdate = datetime.datetime.now()
     userInfoCheck.last_activity = currentdate
+    userInfoCheck.is_active = False
     db.session.commit()
     session.clear()
     flash("Başarıyla çıkış yapıldı.","success")
@@ -163,10 +186,11 @@ def logoutPage():
 @app.route("/user/<string:username>")
 @login_required
 def userProfile(username):
-    userInfoCheck = users.query.filter_by(username=username).first()
+    userInfoCheck = User.query.filter_by(username=username).first()
+    selfInfoCheck = User.query.filter_by(username=session["username"]).first()
     if userInfoCheck:
         userArticlesCheck = articles.query.filter_by(author=userInfoCheck.username).all()
-        return render_template("user.html", user = userInfoCheck, userArticles=userArticlesCheck)
+        return render_template("user.html", user = userInfoCheck, userArticles=userArticlesCheck, selfinfo = selfInfoCheck)
     else:
         flash("Böyle bir kullanıcı yok.","warning")
         return redirect(url_for("indexPage"))
@@ -176,8 +200,8 @@ def passwordChangePage():
     form = ResetPassForm(request.form)
     if request.method == "POST":
         logUsername = form.username.data
-        userInfoCheck = users.query.filter_by(username=logUsername).first()
-        if userInfoCheck:  
+        userInfoCheck = User.query.filter_by(username=logUsername).first()
+        if userInfoCheck:
             oldpass = form.oldpass.data  
             newpass = form.newpass.data
             newpassagain = form.newpassagain.data
@@ -189,7 +213,7 @@ def passwordChangePage():
     return render_template("forgot.html", form=form)
 
 @app.route("/articles") 
-@login_required 
+@login_required
 def articlesPage():
     articlesData = articles.query.filter().all()
     if articlesData:
@@ -221,16 +245,15 @@ def articleDetail(id):
         return render_template("article.html", article = getArticle)
     else:
         return render_template("article.html")
-        
 
-@app.route("/dashboard")
+@app.route("/userdashboard")
 @login_required 
-def dashboardPage():    
-    articlesData = articles.query.filter().all()
+def userdashboardPage():    
+    articlesData = articles.query.filter_by(author = session["username"]).all()
     if articlesData:
-        return render_template("dashboard.html", articles=articlesData)
+        return render_template("userdashboard.html", articles=articlesData)
     else:
-        return render_template("dashboard.html")
+        return render_template("userdashboard.html")
 
 @app.route("/addarticle", methods = ["GET","POST"])
 @login_required
@@ -249,6 +272,30 @@ def addArticle():
     
     return render_template("addarticle.html", form = form)
 
+@app.route("/edit/<string:id>", methods = ["GET","POST"])
+@login_required
+def edit(id):
+    if request.method == "GET":
+        getArticle = articles.query.filter_by(artID=id, author = session["username"]).first()
+        if getArticle:
+            form = ArticleForm()
+            form.title.data = getArticle.title
+            form.content.data = getArticle.content
+            return render_template("editarticle.html",form = form)
+        else:
+            flash("Böyle bir makale yok ya da makale size ait değil!","danger")
+            return redirect(url_for("dashboardPage"))
+    else:
+        form = ArticleForm(request.form)
+        newTitle = form.title.data
+        newContent = form.content.data
+        getArticle = articles.query.filter_by(artID=id, author = session["username"]).first()
+        getArticle.title = newTitle
+        getArticle.content = newContent
+        db.session.commit()
+        flash("Makale başarıyla güncellendi!","success")
+    return redirect(url_for("dashboardPage"))
+
 @app.route("/delete/<string:id>")
 @login_required
 def deleteArticle(id):
@@ -261,6 +308,8 @@ def deleteArticle(id):
     else:
         flash("Böyle bir makale yok ya da makale size ait değil!","danger")
         return redirect(url_for("dashboardPage"))
+    
+    
 
 if __name__ == "__main__":
     db.create_all()
