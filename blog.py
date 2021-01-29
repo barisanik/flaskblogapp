@@ -3,10 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
 import datetime
-from functools import wraps #decorator ile giriş kontrolü için
+from functools import wraps
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////blog/directory/blog.db'
-app.secret_key = "myblog"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////blog_directory/blog.db'
+app.secret_key = "SECRET_KEY"
 db = SQLAlchemy(app)
 
 #Database tables
@@ -113,7 +113,7 @@ class ResetPassForm(Form):
 # Article Form
 class ArticleForm(Form):
     title = StringField("Makale Başlığı", validators = [validators.Length(min=5, max=100)])
-    content = TextAreaField("Makale İçeriği", validators = [validators.Length(min=20)] ) #Büyük yer kaplayabileceği için TextAreaField seçildi.
+    content = TextAreaField("Makale İçeriği", validators = [validators.Length(min=20)] )
     
 
 @app.route("/")
